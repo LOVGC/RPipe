@@ -40,17 +40,23 @@ def runExperiment():
     cfg['checkpoint_path'] = os.path.join(cfg['tag_path'], 'checkpoint')
     cfg['best_path'] = os.path.join(cfg['tag_path'], 'best')
     cfg['logger_path'] = os.path.join(cfg['tag_path'], 'logger', 'train')
+
+    # prepare dataset  
     dataset = make_dataset(cfg['data_name'])
     dataset = process_dataset(dataset)
+
+    # prepare model
     model = make_model(cfg['model'])
+
+    # whether to resume training or train from scratch
     result = resume(cfg['checkpoint_path'], resume_mode=cfg['resume_mode'])
-    if result is None:
+    if result is None: # train from scratch
         cfg['step'] = 0
         model = model.to(cfg['device'])
         optimizer = make_optimizer(model.parameters(), cfg[cfg['tag']]['optimizer'])
         scheduler = make_scheduler(optimizer, cfg[cfg['tag']]['optimizer'])
         logger = make_logger(cfg['logger_path'], data_name=cfg['data_name'])
-    else:
+    else:  # resume training
         cfg['step'] = result['cfg']['step']
         model = model.to(cfg['device'])
         optimizer = make_optimizer(model.parameters(), cfg[cfg['tag']]['optimizer'])
@@ -79,6 +85,9 @@ def runExperiment():
 
 
 def train(data_loader, model, optimizer, scheduler, logger):
+    """ 
+    train over the data_loader once.
+    """
     model.train(True)
     start_time = time.time()
     with logger.profiler:
