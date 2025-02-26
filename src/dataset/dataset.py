@@ -8,7 +8,7 @@ from torch.utils.data.dataloader import default_collate
 from config import cfg
 
 
-def make_dataset(data_name, transform=False, process=False, verbose=True):
+def make_dataset(data_name, transform=True, process=False, verbose=True):
     dataset_ = {}
     if verbose:
         print('fetching data {}...'.format(data_name))
