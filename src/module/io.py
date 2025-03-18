@@ -9,7 +9,9 @@ def check_exists(path):
 
 
 def makedir_exist_ok(path):
-    os.makedirs(path, exist_ok=True)
+    # create directories recursively, 
+    # exist_ok=True means if the directory already exists, do nothing
+    os.makedirs(path, exist_ok=True)  
     return
 
 

@@ -24,7 +24,7 @@ class MNIST(Dataset):
         self.split = split
         self.transform = transform
         if not check_exists(self.processed_folder) or process:
-            self.process()
+            self.process()  # 如果数据还没下载，就下下来，然后，把 train, val, test 放到 processed folder.
         self.id, self.data, self.target = load(os.path.join(self.processed_folder, self.split))
         self.other = {}
         self.classes_counts = make_classes_counts(self.target)
@@ -35,11 +35,12 @@ class MNIST(Dataset):
             self.target[index])
         input = {'id': id, 'data': data, 'target': target}
         other = {k: torch.tensor(self.other[k][index]) for k in self.other}
-        input = {**input, **other}
+        input = {**input, **other}  # 解包字典。
         if self.transform is not None:
             input = self.transform(input)
-        return input
-
+        # 这里的返回值是一个 dict, 包含了训练所需要的所有信息，比如，模型的输入;
+        # 数据的 id; target; other 信息。 
+        return input  
     def __len__(self):
         return len(self.data)
 
@@ -74,6 +75,8 @@ class MNIST(Dataset):
         return fmt_str
 
     def make_data(self):
+        # 这个 make_data 就是在做 process raw data. 把 raw data 做 train, val, test split.
+        # 处理成模型训练所需格式
         train_data = read_image_file(os.path.join(self.raw_folder, 'train-images-idx3-ubyte'))
         test_data = read_image_file(os.path.join(self.raw_folder, 't10k-images-idx3-ubyte'))
         train_target = read_label_file(os.path.join(self.raw_folder, 'train-labels-idx1-ubyte'))

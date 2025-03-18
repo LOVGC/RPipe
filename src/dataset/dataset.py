@@ -1,4 +1,4 @@
-import dataset
+import dataset  # 这个 dataset 是啥？
 import numpy as np
 import os
 import torch
@@ -15,6 +15,8 @@ def make_dataset(data_name, transform=True, process=False, verbose=True):
     root = os.path.join('data', data_name)
 
     if data_name in ['MNIST', 'FashionMNIST']:
+        # 这里 dataset.MNIST 就是在 mnist.py 定义的那个 class
+        # process: 是否做预处理
         dataset_['train'] = eval('dataset.{}(root=root, split="train", process=process, '
                                  'transform=dataset.Compose([transforms.ToTensor()]))'.format(data_name))
         dataset_['test'] = eval('dataset.{}(root=root, split="test", '
@@ -125,3 +127,4 @@ def process_dataset(dataset):
         cfg['eval_period'] = int(np.ceil(len(processed_dataset['train']) / cfg['batch_size']))
         cfg[cfg['tag']]['optimizer']['num_steps'] = cfg['num_steps']
     return processed_dataset
+
