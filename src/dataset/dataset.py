@@ -1,4 +1,4 @@
-import dataset  # 这个 dataset 是啥？
+import dataset  # 这个 dataset 是啥？站在 src folder 里的主程序来讲，这个 dataset 指的是 src/dataset 这个 package
 import numpy as np
 import os
 import torch

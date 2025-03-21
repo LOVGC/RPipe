@@ -15,12 +15,12 @@ if __name__ == "__main__":
     process_control()
     with torch.no_grad():
         for data_name in data_names:
-            dataset = make_dataset(data_name, transform=False, process=True)
+            dataset = make_dataset(data_name, transform=False, process=True) # 核心
             dataset['train'].transform = Compose([transforms.ToTensor()])
-            process_dataset(dataset)
+            process_dataset(dataset) # 对 dataset 没有什么改变，就是根据 dataset，在 cfg 变量里面加入信息。
             cfg['step'] = 0
             data_loader = make_data_loader(dataset, cfg[cfg['tag']]['optimizer']['batch_size'], shuffle=False)
-            stats = Stats(dim=dim)
+            stats = Stats(dim=dim) # 生成关于这个 dataset 的统计信息。
             for i, input in enumerate(data_loader['train']):
                 stats.update(input['data'])
             print(data_name, stats)

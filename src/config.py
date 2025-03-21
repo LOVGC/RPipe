@@ -4,11 +4,14 @@ import yaml
 global cfg
 if 'cfg' not in globals():
     with open('config.yml', 'r') as f:
-        cfg = yaml.load(f, Loader=yaml.FullLoader)
+        cfg = yaml.load(f, Loader=yaml.FullLoader)  # load initial cfg variable
 
 delimiters = ['_', '-', '~', ';', '#']
 
-
+# 这个函数的作用：如果有针对这个实验的 <data name>_<model name>.yml 文件（在 output/config/ 文件夹下）,就 Load 针对这个实验
+# 的 <data name>_<model name>.yml 文件，并覆盖全局变量 cfg. 如果用户通过 args 传进来的 configs 跟 <data name>_<model name>.yml
+# 的 configs 不同，那就继续覆盖 <data name>_<model name>.yml 的 configs. 
+# 所以优先级是：用户传进来的 args (实验配置参数) > <data name>_<model name>.yml(output/config/ 文件下) > 默认的 config.yml（src/config.yml)
 def process_args(args):
     global cfg
     if 'control_name' in args and args['control_name'] is not None:

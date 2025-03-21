@@ -65,10 +65,13 @@ def main():
         controls = make_controls(script_name, init_seeds, num_experiments, resume_mode, control_name)
     else:
         raise ValueError('Not valid mode')
+    
+    # 会利用最外面这个 config.yml 做为模板，然后根据不同的 control_name （dataset, model） 生成
+    # 这个实验对应的配置文件：<dataset_name>_<model_name>.yml (放在 output/config 里面)
     with open('config.yml', 'r') as f:
         cfg = yaml.load(f, Loader=yaml.FullLoader)
-    s = '#!/bin/bash\n'
-    j = 1
+    s = '#!/bin/bash\n'   # 这个 s 存的就是做实验所需的 python 执行命令
+    j = 1  # 这个 j 指的是第 j 个实验
     k = 1
     for i in range(len(controls)):
         controls[i] = list(controls[i])

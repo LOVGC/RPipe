@@ -13,10 +13,21 @@ from module import check, resume, to_device, process_control
 
 cudnn.benchmark = True
 parser = argparse.ArgumentParser(description='cfg')
+# 这个 for loop 就是把原来 cfg 里面的东西都给复制过来加到 parser 里面。
+# 这个原来的 cfg 就是存在 src/config.yml 里面的值。
+# 这个 for loop 其实就是一堆 parser.add_argument(...)
 for k in cfg:
     exec('parser.add_argument(\'--{0}\', default=cfg[\'{0}\'], type=type(cfg[\'{0}\']))'.format(k))
 parser.add_argument('--control_name', default=None, type=str)
 args = vars(parser.parse_args())
+# 这个process_args(args)函数的作用：
+# 如果有针对这个实验的 <data name>_<model name>.yml 文件（在 output/config/ 文件夹下）,
+# 就 Load 针对这个实验的 <data name>_<model name>.yml 文件，并覆盖全局变量 cfg. 
+# 如果用户通过 args 传进来的 configs 跟 <data name>_<model name>.yml 的 configs 不同，那就继续覆盖 <data name>_<model name>.yml 的 configs. 
+# 所以优先级是：用户传进来的 args (实验配置参数) > <data name>_<model name>.yml(output/config/ 文件下) > 默认的 config.yml（src/config.yml)
+# 总结：这个函数的作用是让用户可以自定义实验的配置参数
+# 1. 如果用户没有声明特殊的配置，那么就用 <data name>_<model name>.yml(output/config/ 文件下) 的配置
+# 2. 如果用户声明了特殊的配置，那么就用用户声明的配置覆盖 <data name>_<model name>.yml(output/config/ 文件下) 的配置
 process_args(args)
 
 
