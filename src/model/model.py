@@ -7,9 +7,9 @@ from transformers import get_linear_schedule_with_warmup
 
 
 def make_model(cfg):
-    core = eval('model.{}(cfg)'.format(cfg['model_name']))
-    model_ = model.base(core)
-    return model_
+    core = eval('model.{}(cfg)'.format(cfg['model_name']))  # core 指的是 core model: 计算从输入到 prediction 的那个模型。不包含 loss 的计算。
+    model_ = model.base(core)   # model_ 就是把 loss 给加入到计算图里面，i.e. model_ 这个类就是把 loss 和 core model 结合在一起。
+    return model_  # model_ 就是表示了训练时候的整个计算图： core model + loss。
 
 
 def init_param(m):

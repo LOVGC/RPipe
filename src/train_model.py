@@ -29,20 +29,28 @@ args = vars(parser.parse_args())
 # 1. 如果用户没有声明特殊的配置，那么就用 <data name>_<model name>.yml(output/config/ 文件下) 的配置
 # 2. 如果用户声明了特殊的配置，那么就用用户声明的配置覆盖 <data name>_<model name>.yml(output/config/ 文件下) 的配置
 process_args(args)
+# 这里我们弄明白了这些配置文件的关系。
+# 这里一个重要的知识是：cfg 这个变量是程序一直在用的。程序有可能根据情况去动态调整它。
 
 
 def main():
+    # 为每一次实验设置一个不同的 seed. 所以这里是一个 list. 生成 seed 的方式也很简单，就是一个 range.
+    # 如果只有一个实验，那就只有一个 seed.
     seeds = list(range(cfg['init_seed'], cfg['init_seed'] + cfg['num_experiments']))
     for i in range(cfg['num_experiments']):
+        # tag_list = [seed, control_name]
         tag_list = [str(seeds[i]), cfg['control_name']]
+
+        # cfg['tag'] = '<seed>_<dataset name>_<model_name>', 这个变量存的就是这个实验的名字，用来区分不用实验。
         cfg['tag'] = '_'.join([x for x in tag_list if x])
-        process_control()
+        process_control() # 对每一个实验进行实验参数配置：模型架构，training protocol, optimizer
         print('Experiment: {}'.format(cfg['tag']))
         runExperiment()
     return
 
 
 def runExperiment():
+    # 准备实验参数：seed, path, logger 
     cfg['seed'] = int(cfg['tag'].split('_')[0])
     torch.manual_seed(cfg['seed'])
     torch.cuda.manual_seed(cfg['seed'])
@@ -54,6 +62,9 @@ def runExperiment():
 
     # prepare dataset  
     dataset = make_dataset(cfg['data_name'])
+
+    # 这里 process_dataset, 也是在动态地去改变这个 global 的 cfg. 
+    # 这里是根据具体的 dataset 的参数去更新这个 cfg 的参数。
     dataset = process_dataset(dataset)
 
     # prepare model
@@ -83,6 +94,7 @@ def runExperiment():
                                    cfg['collate_mode'], cfg['seed'])
     data_iterator = enumerate(data_loader['train'])
     while cfg['step'] < cfg['num_steps']:
+        # train over the data_iterator once, 就是一个 epoch
         train(data_iterator, model, optimizer, scheduler, logger)
         test(data_loader['test'], model, logger)
         result = {'cfg': cfg, 'model': model.state_dict(),
@@ -110,7 +122,7 @@ def train(data_loader, model, optimizer, scheduler, logger):
             output = model(**input)
             loss = 1 / cfg['step_period'] * output['loss']
             loss.backward()
-            if (i + 1) % cfg['step_period'] == 0:
+            if (i + 1) % cfg['step_period'] == 0:  # 由此可见，step_period 指的是参数更新的周期。
                 optimizer.step()
                 scheduler.step()
                 optimizer.zero_grad()

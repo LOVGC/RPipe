@@ -12,11 +12,11 @@ def make_dataset(data_name, transform=True, process=False, verbose=True):
     dataset_ = {}
     if verbose:
         print('fetching data {}...'.format(data_name))
-    root = os.path.join('data', data_name)
+    root = os.path.join('data', data_name)  # 这里的 root 指的是 src/data/<Dataset name> 这个文件夹
 
     if data_name in ['MNIST', 'FashionMNIST']:
         # 这里 dataset.MNIST 就是在 mnist.py 定义的那个 class
-        # process: 是否做预处理
+        # 这里 eval(...) 返回的 object 就是代表了这个 dataset 的 train or test 的数据集。包括 input data, target data.
         dataset_['train'] = eval('dataset.{}(root=root, split="train", process=process, '
                                  'transform=dataset.Compose([transforms.ToTensor()]))'.format(data_name))
         dataset_['test'] = eval('dataset.{}(root=root, split="test", '
@@ -25,7 +25,7 @@ def make_dataset(data_name, transform=True, process=False, verbose=True):
             data_stats = (cfg['model']['stats'].mean.tolist(), cfg['model']['stats'].std.tolist())
             dataset_['train'].transform = dataset.Compose([
                 transforms.ToTensor(),
-                transforms.Normalize(*data_stats)])
+                transforms.Normalize(*data_stats)])  # 对 data 做 preprocessing 
             dataset_['test'].transform = dataset.Compose([
                 transforms.ToTensor(),
                 transforms.Normalize(*data_stats)])
@@ -49,7 +49,7 @@ def make_dataset(data_name, transform=True, process=False, verbose=True):
                                  'transform=dataset.Compose([transforms.ToTensor()]))'.format(data_name))
         dataset_['test'] = eval('dataset.{}(root=root, split="test", '
                                 'transform=dataset.Compose([transforms.ToTensor()]))'.format(data_name))
-        if transform:
+        if transform:  # 不同的数据，做不同的 transform
             data_stats = (cfg['model']['stats'].mean.tolist(), cfg['model']['stats'].std.tolist())
             dataset_['train'].transform = dataset.Compose([
                 transforms.RandomCrop(32, padding=4, padding_mode='reflect'),
@@ -120,11 +120,12 @@ def make_data_loader(dataset, batch_size, num_steps=None, step=0, step_period=1,
 def process_dataset(dataset):
     processed_dataset = dataset
     cfg['num_samples'] = {k: len(processed_dataset[k]) for k in processed_dataset}
-    cfg['model']['data_size'] = dataset['train'].data_size
+    cfg['model']['data_size'] = dataset['train'].data_size  # cfg['model']['data_size'] 是说，这个变量存的是模型输入数据的 shape
     cfg['model']['target_size'] = dataset['train'].target_size
     if 'num_epochs' in cfg:
+        # 这里课件 num_steps 就是模型做 forward 和 backward 的次数。i.e. update weights 的次数。
         cfg['num_steps'] = int(np.ceil(len(processed_dataset['train']) / cfg['batch_size'])) * cfg['num_epochs']
-        cfg['eval_period'] = int(np.ceil(len(processed_dataset['train']) / cfg['batch_size']))
+        cfg['eval_period'] = int(np.ceil(len(processed_dataset['train']) / cfg['batch_size'])) # 每一个 epoch 评估一次模型的性能。
         cfg[cfg['tag']]['optimizer']['num_steps'] = cfg['num_steps']
     return processed_dataset
 

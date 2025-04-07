@@ -9,7 +9,9 @@ from .utils import download_url, extract_file, make_classes_counts
 
 
 class MNIST(Dataset):
+    # 数据集的名字
     data_name = 'MNIST'
+    # 数据集的下载链接
     file = [('https://ossci-datasets.s3.amazonaws.com/mnist/train-images-idx3-ubyte.gz',
              'f68b3c2dcbeaaa9fbdd348bbdeb94873'),
             ('https://ossci-datasets.s3.amazonaws.com/mnist/t10k-images-idx3-ubyte.gz',
@@ -19,13 +21,30 @@ class MNIST(Dataset):
             ('https://ossci-datasets.s3.amazonaws.com/mnist/t10k-labels-idx1-ubyte.gz',
              'ec29112dd5afa0611ce80d1b7f02629c')]
 
-    def __init__(self, root, split, process=False, transform=None):
-        self.root = os.path.expanduser(root)
-        self.split = split
-        self.transform = transform
+    def __init__(self, root, split, process=False, transform=None): 
+        """
+        Args:
+            root (str): root 是说数据存放的根目录。这个 root 就是 src/data
+            split (str): train, val, or test
+            process (bool): raw data 时候已经处理过了。 process=True 意思是，已经产生了 src/data/<data_name>/processed folder
+            transform (callable, optional): 需要用哪些 transform 来处理数据。
+        """
+        self.root = os.path.expanduser(root)  # root 是说数据存放的根目录。这个 root 就是 src/data/<dataset name>
+        self.split = split # train, val, or test
+        self.transform = transform # 需要用哪些 transform 来处理数据。
+
+        # 如果数据还没下载，就下下来，放到 src/data/<data_name>/raw folder. 这里 data_name 就是这个数据集的名字
+        # 然后，把 train, val, test 放到 src/data/<data_name>/processed folder.
         if not check_exists(self.processed_folder) or process:
-            self.process()  # 如果数据还没下载，就下下来，然后，把 train, val, test 放到 processed folder.
+            self.process()  
+        
+
+        # 这里的 id 就是给每一个 data sample 一个 id.
+        # data 是 (N, W, H, C): N number of training samples, W width, H height, C channel.
+        # target 是 (N,): N number of training samples.
+        # 这里 data 的 shape, target 的 shape 要根据具体的数据集来定。
         self.id, self.data, self.target = load(os.path.join(self.processed_folder, self.split))
+
         self.other = {}
         self.classes_counts = make_classes_counts(self.target)
         self.data_size, self.target_size, self.classes_to_labels = load(os.path.join(self.processed_folder, 'meta'))
@@ -38,8 +57,11 @@ class MNIST(Dataset):
         input = {**input, **other}  # 解包字典。
         if self.transform is not None:
             input = self.transform(input)
-        # 这里的返回值是一个 dict, 包含了训练所需要的所有信息，比如，模型的输入;
-        # 数据的 id; target; other 信息。 
+        # 这里的返回值是一个 dict, 包含了训练所需要的所有信息，包括 id, data, target, 以及其他信息。
+        # 举例：
+        #   {'id': tensor(0), 
+        #   'data': <PIL.Image.Image image mode=L size=28x28 at 0x12CC41B50>, 
+        #   'target': tensor(5)}
         return input  
     def __len__(self):
         return len(self.data)

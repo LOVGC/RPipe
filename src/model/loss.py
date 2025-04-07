@@ -4,13 +4,17 @@ import torch.nn.functional as F
 
 def make_loss(output, input):
     if 'target' in input:
-        loss = loss_fn(output['pred'], input['target'])
+        # # 这里 output['pred'] 是指 core model 的输出，input['target'] 是指 ground truth。
+        loss = loss_fn(output['pred'], input['target'])  
     else:
         return
     return loss
 
 
 def loss_fn(output, target, reduction='mean'):
+    """
+    这里 output 是 core model 的输出，target 是 ground truth。
+    """
     if target.dtype == torch.int64:
         loss = F.cross_entropy(output, target, reduction=reduction)
     else:
