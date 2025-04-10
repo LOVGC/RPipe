@@ -59,8 +59,12 @@ def main():
     filename = '{}_{}'.format(run, mode)
     if mode == 'base':
         script_name = [['{}_model.py'.format(run)]]
-        data_name = ['MNIST', 'CIFAR10']
-        model_name = ['linear', 'mlp', 'cnn', 'resnet18']
+        # data_name = ['MNIST', 'CIFAR10']
+        # model_name = ['linear', 'mlp', 'cnn', 'resnet18']
+
+        data_name = ['MNIST']
+        model_name = ['linear']
+
         control_name = [[data_name, model_name]]
         controls = make_controls(script_name, init_seeds, num_experiments, resume_mode, control_name)
     else:

@@ -9,7 +9,8 @@ if __name__ == "__main__":
     stats_path = os.path.join('output', 'stats')
     dim = 1
     # data_names = ['MNIST', 'FashionMNIST', 'SVHN', 'CIFAR10', 'CIFAR100']
-    data_names = ['MNIST', 'CIFAR10']
+    # data_names = ['MNIST', 'CIFAR10']
+    data_names = ['MNIST']
     cfg['seed'] = 0
     cfg['tag'] = 'make_dataset'
     process_control()

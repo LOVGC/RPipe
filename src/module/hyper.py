@@ -21,7 +21,9 @@ def process_control():
     cfg['eval_period'] = 200
     cfg['eval'] = {}
     cfg['eval']['num_steps'] = -1
-    cfg['num_epochs'] = 400
+    
+    cfg['num_epochs'] = 10
+
     cfg['collate_mode'] = 'dict'
 
     cfg['model'] = {}

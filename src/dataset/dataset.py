@@ -118,6 +118,13 @@ def make_data_loader(dataset, batch_size, num_steps=None, step=0, step_period=1,
 
 
 def process_dataset(dataset):
+    """
+    这个函数的作用其实没有对 dataset 做任何改动。
+    它的作用是根据 dataset 的 train 和 test 的数据集的长度，来设置 cfg 里面的一些参数。比如 
+        training 的 num_steps, eval_period.
+        模型输入的数据的 shape (一个 sample 的 shape)
+        target shape (一个 sample 的 shape)
+    """
     processed_dataset = dataset
     cfg['num_samples'] = {k: len(processed_dataset[k]) for k in processed_dataset}
     cfg['model']['data_size'] = dataset['train'].data_size  # cfg['model']['data_size'] 是说，这个变量存的是模型输入数据的 shape

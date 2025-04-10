@@ -21,6 +21,8 @@ def main():
     seeds = list(range(cfg['init_seed'], cfg['init_seed'] + cfg['num_experiments']))
     for i in range(cfg['num_experiments']):
         tag_list = [str(seeds[i]), cfg['control_name']]
+
+        # cfg['tag'] = '<seed>_<dataset name>_<model_name>', 这个变量存的就是这个实验的名字，用来区分不用实验。
         cfg['tag'] = '_'.join([x for x in tag_list if x])
         process_control()
         print('Experiment: {}'.format(cfg['tag']))
@@ -32,16 +34,16 @@ def runExperiment():
     cfg['seed'] = int(cfg['tag'].split('_')[0])
     torch.manual_seed(cfg['seed'])
     torch.cuda.manual_seed(cfg['seed'])
-    cfg['path'] = os.path.join('output', 'exp')
-    cfg['tag_path'] = os.path.join(cfg['path'], cfg['tag'])
-    cfg['checkpoint_path'] = os.path.join(cfg['tag_path'], 'checkpoint')
-    cfg['best_path'] = os.path.join(cfg['tag_path'], 'best')
-    cfg['logger_path'] = os.path.join(cfg['tag_path'], 'logger', 'test')
-    cfg['result_path'] = os.path.join('output', 'result', cfg['tag'])
+    cfg['path'] = os.path.join('output', 'exp') # output/exp 存的是 train and test 的实验结果。
+    cfg['tag_path'] = os.path.join(cfg['path'], cfg['tag']) # output/exp/<seed>_<dataset name>_<model_name> 存的是用这个 seed,dataset,model 做实验的结果。
+    cfg['checkpoint_path'] = os.path.join(cfg['tag_path'], 'checkpoint') # 存的是这个实验<seed>_<dataset name>_<model_name>的 checkpoint
+    cfg['best_path'] = os.path.join(cfg['tag_path'], 'best') # 存的是这个实验<seed>_<dataset name>_<model_name>的 best
+    cfg['logger_path'] = os.path.join(cfg['tag_path'], 'logger', 'test') # 存的是这个实验<seed>_<dataset name>_<model_name>的 test log
+    cfg['result_path'] = os.path.join('output', 'result', cfg['tag']) # 存的是这个实验<seed>_<dataset name>_<model_name>的result
     dataset = make_dataset(cfg['data_name'])
-    dataset = process_dataset(dataset)
+    dataset = process_dataset(dataset) # 根据 dataset 长度，更新 cfg 里面的参数。
     model = make_model(cfg['model'])
-    result = resume(cfg['best_path'])
+    result = resume(cfg['best_path'])  # load the result of the best model.
     if result is None:
         raise ValueError('No valid model, please train model first')
     cfg['step'] = result['cfg']['step']

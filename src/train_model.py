@@ -35,7 +35,7 @@ process_args(args)
 
 def main():
     # 为每一次实验设置一个不同的 seed. 所以这里是一个 list. 生成 seed 的方式也很简单，就是一个 range.
-    # 如果只有一个实验，那就只有一个 seed.
+    # 如果只有一个实验，那就只有一个 seed.不同实验其实就是用不同的 seed.
     seeds = list(range(cfg['init_seed'], cfg['init_seed'] + cfg['num_experiments']))
     for i in range(cfg['num_experiments']):
         # tag_list = [seed, control_name]
