@@ -99,7 +99,7 @@ def runExperiment():
         test(data_loader['test'], model, logger)
         result = {'cfg': cfg, 'model': model.state_dict(),
                   'optimizer': optimizer.state_dict(), 'scheduler': scheduler.state_dict(),
-                  'logger': logger.state_dict()}
+                  'logger': logger.state_dict()}  # result is a dict
         check(result, cfg['checkpoint_path'])
         if logger.compare('test'):
             shutil.copytree(cfg['checkpoint_path'], cfg['best_path'], dirs_exist_ok=True)

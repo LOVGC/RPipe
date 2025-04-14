@@ -44,6 +44,9 @@ def load(path, mode='torch'):
 
 
 def io_mode(filename):
+    """
+    这里定义了存储格式，有些是用 torch.save 来存，有些是用 pickle 来存。
+    """
     if filename in ['cfg', 'model', 'optimizer']:
         mode = 'torch'
     else:
