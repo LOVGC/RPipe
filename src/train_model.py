@@ -73,7 +73,7 @@ def runExperiment():
     # whether to resume training or train from scratch
     result = resume(cfg['checkpoint_path'], resume_mode=cfg['resume_mode'])
     if result is None: # train from scratch
-        cfg['step'] = 0
+        cfg['step'] = 0  # 记录 current training step.
         model = model.to(cfg['device'])
         optimizer = make_optimizer(model.parameters(), cfg[cfg['tag']]['optimizer'])
         scheduler = make_scheduler(optimizer, cfg[cfg['tag']]['optimizer'])
@@ -93,8 +93,17 @@ def runExperiment():
                                    cfg['step'], cfg['step_period'], cfg['pin_memory'], cfg['num_workers'],
                                    cfg['collate_mode'], cfg['seed'])
     data_iterator = enumerate(data_loader['train'])
-    while cfg['step'] < cfg['num_steps']:
+    
+    # 这里 cfg['num_steps'] 就是模型参数需要更新的总次数。
+    #   cfg['step'] 就是记录当前模型参数更新的次数。
+    while cfg['step'] < cfg['num_steps']: 
         # train over the data_iterator once, 就是一个 epoch
+        # 这里，虽然最外面这个循环是用 cfg['num_steps'] 来控制的，但是 train()的的确确是 train 一个 epoch.
+        #      为什么要这样写呢？为什么不是 for i in range(num_epochs) 呢？
+        #         因为，这里在 train 里面的代码要考虑到一些事情：比如有时候，我们并不是算一个 batch （一次 forward and backward） 就 update 一次参数，
+        #         而是，算两个或者多个 batch (两次或者多次 forward and backward) 才更新一次参数。这种情况适用于你 GPU 太小，但是还想用大的 batchsize 
+        #         来 update 模型参数。
+        #      所以，总结来看，有时候并不是做一次 forward and backward 就更新一次参数。
         train(data_iterator, model, optimizer, scheduler, logger)
         test(data_loader['test'], model, logger)
         result = {'cfg': cfg, 'model': model.state_dict(),
@@ -122,13 +131,13 @@ def train(data_loader, model, optimizer, scheduler, logger):
             output = model(**input)
             loss = 1 / cfg['step_period'] * output['loss']
             loss.backward()
-            if (i + 1) % cfg['step_period'] == 0:  # 由此可见，step_period 指的是参数更新的周期。
+            if (i + 1) % cfg['step_period'] == 0:  # 由此可见，cfg['step_period'] 指的是参数更新的周期。就是每个几个 step 更新一次模型参数。
                 optimizer.step()
                 scheduler.step()
                 optimizer.zero_grad()
             evaluation = logger.evaluate('train', 'batch', input, output)
             logger.append(evaluation, 'train', n=input_size)
-            idx = cfg['step'] % cfg['eval_period']
+            idx = cfg['step'] % cfg['eval_period']  # cfg['eval_period'] 就是每隔几个 step evaluation 一次。
             if idx % max(int(cfg['eval_period'] * cfg['log_interval']), 1) == 0 and (i + 1) % cfg['step_period'] == 0:
                 step_time = (time.time() - start_time) / (idx + 1)
                 lr = optimizer.param_groups[0]['lr']
@@ -145,7 +154,7 @@ def train(data_loader, model, optimizer, scheduler, logger):
                 logger.append(info, 'train')
                 print(logger.write('train'))
             if (i + 1) % cfg['step_period'] == 0:
-                cfg['step'] += 1
+                cfg['step'] += 1  # 注意，这里对 cfg['step'] 的更新，确实说明 cfg['step'] 记录的就是模型参数更新的次数。
             if (idx + 1) % cfg['eval_period'] == 0 and (i + 1) % cfg['step_period'] == 0:
                 break
     return

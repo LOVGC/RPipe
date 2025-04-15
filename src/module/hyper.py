@@ -16,13 +16,19 @@ def process_control():
 
     cfg['batch_size'] = 250
     cfg['step_period'] = 1 # 每次训练多少个 step 就做一次操作，至于是什么操作，可能是更新 learning rate, 也可能是更新统计数据
-    cfg['num_steps'] = 80000 # 一个 step 就是模型在一个 batch 数据上完成一次前向传播和后向传播的过程。
+    
+    # 一个 step 就是模型更新一次参数。
+    # 这个参数跟 num_epochs 的关系：
+    #    如果你不提供 num_epochs,i.e. 把 "cfg['num_epochs'] = 1" 给 comment 掉，那么就会用这里的 cfg['num_steps'] 去训练。
+    #    如果你提供了 num_epochs, e.g. "cfg['num_epochs'] = 10", 那么在 run_experiment() 中会根据这个 cfg['num_epochs'] 去自动计算 num_steps.
+    cfg['num_steps'] = 80000 
+
 
     cfg['eval_period'] = 200
     cfg['eval'] = {}
     cfg['eval']['num_steps'] = -1
     
-    cfg['num_epochs'] = 10
+    cfg['num_epochs'] = 1
 
     cfg['collate_mode'] = 'dict'
 

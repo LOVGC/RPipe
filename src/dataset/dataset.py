@@ -130,7 +130,7 @@ def process_dataset(dataset):
     cfg['model']['data_size'] = dataset['train'].data_size  # cfg['model']['data_size'] 是说，这个变量存的是模型输入数据的 shape
     cfg['model']['target_size'] = dataset['train'].target_size
     if 'num_epochs' in cfg:
-        # 这里课件 num_steps 就是模型做 forward 和 backward 的次数。i.e. update weights 的次数。
+        # 这里 num_steps 就是更新模型参数的总次数。
         cfg['num_steps'] = int(np.ceil(len(processed_dataset['train']) / cfg['batch_size'])) * cfg['num_epochs']
         cfg['eval_period'] = int(np.ceil(len(processed_dataset['train']) / cfg['batch_size'])) # 每一个 epoch 评估一次模型的性能。
         cfg[cfg['tag']]['optimizer']['num_steps'] = cfg['num_steps']

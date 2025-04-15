@@ -10,5 +10,5 @@ init_seed: 0
 num_experiments: 1
 log_interval: 0.25
 device: cpu
-resume_mode: 0
+resume_mode: 0   # resume_mode = 0: 训练的时候不会从 checkpoint 读取模型来训练。 resume_mode = 1：训练时候会从 checkpoint 读取模型进行训练。checkpoint 存的就是最后一个训练 epoch 后的模型。
 profile: False
