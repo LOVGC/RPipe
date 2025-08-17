@@ -13,10 +13,13 @@ def process_args(args):
     global cfg
     if 'control_name' in args and args['control_name'] is not None:
         config_path = os.path.join('output', 'config', '{}.yml'.format(args['control_name']))
-        with open(config_path, 'r') as f:
-            parsed_cfg = yaml.load(f, Loader=yaml.FullLoader)
-        for k in parsed_cfg:
-            cfg[k] = parsed_cfg[k]
+        if os.path.exists(config_path):
+            with open(config_path, 'r') as f:
+                parsed_cfg = yaml.load(f, Loader=yaml.FullLoader)
+            for k in parsed_cfg:
+                cfg[k] = parsed_cfg[k]
+        else:
+            cfg['control'] = make_control(cfg['control'], args['control_name'])
     for k in cfg:
         if k != 'control':
             cfg[k] = args[k]
